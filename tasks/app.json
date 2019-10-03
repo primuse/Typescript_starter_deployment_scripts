@@ -1,0 +1,49 @@
+[
+  {
+    "name": "app",
+    "image": "${image}",
+    "cpu": 256,
+    "memory": 512,
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "app"
+      }
+    },
+    "portMappings": [
+      {
+        "containerPort": 3000,
+        "hostPort": 3000
+      }
+    ],
+    "environment": [
+      {
+        "name": "NODE_ENV",
+        "value": "production"
+      },
+      {
+        "name": "MONGODB_URI",
+        "value": "${mongodb_uri}"
+      },
+      {
+        "name": "SESSION_SECRET",
+        "value": "${session_secret}"
+      },
+      {
+        "name": "FACEBOOK_ID",
+        "value": "${facebook_id}"
+      },
+      {
+        "name": "FACEBOOK_SECRET",
+        "value": "${facebook_secret}"
+      },
+      {
+        "name": "HOST",
+        "value": "0.0.0.0"
+      }
+    ]
+  }
+]
