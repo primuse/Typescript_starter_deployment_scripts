@@ -5,7 +5,7 @@ set -euo pipefail
 GITHUB_TOKEN=$1
 
 #Builds infrastructure and Launches instances with Terraform
-function terraformLaunch {
+function deployResources {
   cd ../
   terraform init -input=false
   terraform validate
@@ -14,7 +14,7 @@ function terraformLaunch {
 }
 
 function main {
-  terraformLaunch
+  deployResources
 }
 
 #Calls the main function

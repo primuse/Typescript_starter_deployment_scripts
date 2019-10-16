@@ -3,12 +3,12 @@ variable "vpc_cidr" {
 }
 
 variable "public_subnet_cidr" {
-  type        = "list"
+  type        = list(string)
   description = "The CIDR block for the public subnet"
 }
 
 variable "private_subnet_cidr" {
-  type        = "list"
+  type        = list(string)
   description = "The CIDR block for the private subnet"
 }
 
@@ -59,7 +59,4 @@ variable "github_repository" {
 variable "github_branch" {
   description = "The github branch to build"
 }
-
-
-
 

@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "source" {
-  bucket        = "primuse"
-  acl           = "private"
+  bucket = "primuse"
+  acl    = "private"
 }
 
 resource "aws_iam_role" "codepipeline_role" {
@@ -20,11 +20,12 @@ resource "aws_iam_role" "codepipeline_role" {
   ]
 }
 EOF
+
 }
 
 resource "aws_iam_role_policy" "codepipeline_policy" {
   name = "codepipeline_policy"
-  role = "${aws_iam_role.codepipeline_role.id}"
+  role = aws_iam_role.codepipeline_role.id
 
   policy = <<EOF
 {
@@ -131,6 +132,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
   ]
 }
 EOF
+
 }
 
 /*
@@ -152,11 +154,12 @@ resource "aws_iam_role" "codebuild_role" {
   ]
 }
 EOF
+
 }
 
 resource "aws_iam_role_policy" "codebuild_policy" {
-  name        = "codebuild-policy"
-  role        = "${aws_iam_role.codebuild_role.id}"
+  name   = "codebuild-policy"
+  role   = aws_iam_role.codebuild_role.id
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -197,22 +200,22 @@ resource "aws_iam_role_policy" "codebuild_policy" {
   ]
 }
 EOF
+
 }
 
 data "template_file" "buildspec" {
-  template = "${file("${path.module}/buildspec.yml")}"
+  template = file("${path.module}/buildspec.yml")
 
-  vars {
-    repository_url     = "${aws_ecr_repository.hackathon.repository_url}"
-    region             = "${var.region}"
+  vars = {
+    repository_url = aws_ecr_repository.hackathon.repository_url
+    region         = var.region
   }
 }
-
 
 resource "aws_codebuild_project" "hackathon_build" {
   name          = "hackathon-codebuild"
   build_timeout = "10"
-  service_role  = "${aws_iam_role.codebuild_role.arn}"
+  service_role  = aws_iam_role.codebuild_role.arn
 
   artifacts {
     type = "CODEPIPELINE"
@@ -227,7 +230,7 @@ resource "aws_codebuild_project" "hackathon_build" {
 
   source {
     type      = "CODEPIPELINE"
-    buildspec = "${data.template_file.buildspec.rendered}"
+    buildspec = data.template_file.buildspec.rendered
   }
 }
 
@@ -235,10 +238,10 @@ resource "aws_codebuild_project" "hackathon_build" {
 
 resource "aws_codepipeline" "pipeline" {
   name     = "hackthon-pipeline"
-  role_arn = "${aws_iam_role.codepipeline_role.arn}"
+  role_arn = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
-    location = "${aws_s3_bucket.source.bucket}"
+    location = aws_s3_bucket.source.bucket
     type     = "S3"
   }
 
@@ -253,10 +256,10 @@ resource "aws_codepipeline" "pipeline" {
       version          = "1"
       output_artifacts = ["source"]
 
-      configuration {
-        Owner      = "${var.github_organization}"
-        Repo       = "${var.github_repository}"
-        Branch     = "${var.github_branch}"
+      configuration = {
+        Owner  = var.github_organization
+        Repo   = var.github_repository
+        Branch = var.github_branch
       }
     }
   }
@@ -273,8 +276,8 @@ resource "aws_codepipeline" "pipeline" {
       input_artifacts  = ["source"]
       output_artifacts = ["imagedefinitions"]
 
-      configuration {
-        ProjectName = "${aws_codebuild_project.hackathon_build.name}"
+      configuration = {
+        ProjectName = aws_codebuild_project.hackathon_build.name
       }
     }
   }
@@ -290,11 +293,12 @@ resource "aws_codepipeline" "pipeline" {
       input_artifacts = ["imagedefinitions"]
       version         = "1"
 
-      configuration {
-        ClusterName = "${aws_ecs_cluster.hackathon_cluster.name}"
-        ServiceName = "${aws_ecs_service.app.name}"
+      configuration = {
+        ClusterName = aws_ecs_cluster.hackathon_cluster.name
+        ServiceName = aws_ecs_service.app.name
         FileName    = "imagedefinitions.json"
       }
     }
   }
 }
+

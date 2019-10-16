@@ -4,8 +4,8 @@ VPC's Default Security Group
 resource "aws_security_group" "default" {
   name        = "Hackathon-default-sg"
   description = "Default security group to allow inbound/outbound from the VPC"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  depends_on  = ["aws_vpc.vpc"]
+  vpc_id      = aws_vpc.vpc.id
+  depends_on  = [aws_vpc.vpc]
 
   ingress {
     from_port = 0
@@ -22,12 +22,11 @@ resource "aws_security_group" "default" {
   }
 }
 
-
 /* security group for ALB */
 resource "aws_security_group" "lb_sg" {
   name        = "Hackathon-lb-sg"
   description = "Allow HTTP from Anywhere into ALB"
-  vpc_id      = "${aws_vpc.vpc.id}"
+  vpc_id      = aws_vpc.vpc.id
 
   ingress {
     from_port   = 80
@@ -50,15 +49,14 @@ resource "aws_security_group" "lb_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = "Hackathon-lb-sg"
   }
 }
 
-
 /* Traffic to the ECS cluster should only come from the ALB */
 resource "aws_security_group" "ecs_tasks" {
-  vpc_id      = "${aws_vpc.vpc.id}"
+  vpc_id      = aws_vpc.vpc.id
   name        = "Hackathon-ecs-task-sg"
   description = "Allow inbound access from the ALB only"
 
@@ -70,13 +68,14 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    security_groups = ["${aws_security_group.lb_sg.id}"]
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lb_sg.id]
   }
 
-  tags {
-    Name        = "Hackathon-ecs-service-sg"
+  tags = {
+    Name = "Hackathon-ecs-service-sg"
   }
 }
+
